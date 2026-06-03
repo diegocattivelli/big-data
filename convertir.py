@@ -1,7 +1,7 @@
 import csv
 import os
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("data/musicbrainz", exist_ok=True)
 
 def convertir(input_path, output_path, columnas, indices, filtro=None):
     count = 0
@@ -19,68 +19,77 @@ def convertir(input_path, output_path, columnas, indices, filtro=None):
             count += 1
     print(f"{output_path}: {count} filas")
 
-# artist — filtrado: solo type 1 (Person) y 2 (Group) con area definida
+# --- ARTIST ---
+# Filtro: solo personas (type=1) y grupos (type=2) con begin_year definido
+# Descarta orquestas, personajes ficticios, coros y registros incompletos
 convertir(
     "mbdump/artist",
-    "data/mb_artist.csv",
+    "data/musicbrainz/mb_artist.csv",
     ["id","mbid","name","sort_name","begin_year","end_year","type","area"],
     [0, 1, 2, 3, 4, 7, 10, 11],
-    filtro=lambda c: len(c) > 11 and c[10] in ("1","2") and c[11] != "\\N"
+    filtro=lambda c: len(c) > 11 and c[10] in ("1","2") and c[4] != "\\N"
 )
 
-# event
+# --- EVENT ---
+# Sin filtro: se incluyen los 117.931 eventos completos
 convertir(
     "mbdump/event",
-    "data/mb_event.csv",
+    "data/musicbrainz/mb_event.csv",
     ["id","mbid","name","begin_year","begin_month","begin_day",
      "end_year","end_month","end_day","type","cancelled"],
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11]
 )
 
-# event_alias
+# --- EVENT_ALIAS ---
+# Sin filtro: nombres alternativos de eventos
 convertir(
     "mbdump/event_alias",
-    "data/mb_event_alias.csv",
+    "data/musicbrainz/mb_event_alias.csv",
     ["id","event_id","name","locale","type","sort_name"],
     [0, 1, 2, 3, 4, 5]
 )
 
-# artist_type
+# --- ARTIST_TYPE ---
+# Tabla de referencia: 1=Person, 2=Group, 3=Orchestra, 4=Choir, 5=Character, 6=Other
 convertir(
     "mbdump/artist_type",
-    "data/mb_artist_type.csv",
+    "data/musicbrainz/mb_artist_type.csv",
     ["id","name"],
     [0, 1]
 )
 
-# event_type
+# --- EVENT_TYPE ---
+# Tabla de referencia: 1=Concert, 2=Festival, 3=Stage performance, etc.
 convertir(
     "mbdump/event_type",
-    "data/mb_event_type.csv",
+    "data/musicbrainz/mb_event_type.csv",
     ["id","name"],
     [0, 1]
 )
 
-# area
+# --- AREA ---
+# Sin filtro: todas las áreas (países, ciudades, regiones)
 convertir(
     "mbdump/area",
-    "data/mb_area.csv",
+    "data/musicbrainz/mb_area.csv",
     ["id","mbid","name"],
     [0, 1, 2]
 )
 
-# country_area
+# --- COUNTRY_AREA ---
+# Tabla de referencia: lista de area_id que son países
 convertir(
     "mbdump/country_area",
-    "data/mb_country_area.csv",
+    "data/musicbrainz/mb_country_area.csv",
     ["area_id"],
     [0]
 )
 
-# l_artist_event
+# --- L_ARTIST_EVENT ---
+# Tabla de relación: vincula artistas con eventos
 convertir(
     "mbdump/l_artist_event",
-    "data/mb_l_artist_event.csv",
+    "data/musicbrainz/mb_l_artist_event.csv",
     ["id","artist_id","event_id"],
     [0, 1, 2]
 )
